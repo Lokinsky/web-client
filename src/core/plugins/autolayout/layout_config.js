@@ -1,5 +1,6 @@
 export default  
 new Object({
+    "container-width":1100,
     "block":[
         {
             "id":"row-block-1",
@@ -69,42 +70,17 @@ new Object({
         {
             "id":"row-block-4",
             "display":"flex",
-            "flex-group":5,
+            "flex-group":3,
             "flex-direction":"column",
             "order":"desc",
-            "justify-content":"center",
-            "items":[
-                {
-                    "id":"item-row-1",
-                    "width":"204",
-                    "height":"228",
-                },
-                {
-                    "id":"item-row-2",
-                    "width":"204",
-                    "height":"228",
-                },
-                {
-                    "id":"item-row-3",
-                    "width":"204",
-                    "height":"228",
-                },
-                {
-                    "id":"item-row-4",
-                    "width":"204",
-                    "height":"228",
-                },
-                {
-                    "id":"item-row-5",
-                    "width":"204",
-                    "height":"228",
-                },
-                {
-                    "id":"item-row-6",
-                    "width":"204",
-                    "height":"228",
-                },
-            ],
+            "justify-content":"left",
+            "item-repeat":4,
+            "items":
+            {
+                "id":"item-row",
+                "width":"314",
+                "height":"228",
+            }
         },
     ],
     

@@ -31,16 +31,17 @@ class Plugin{
                 ()=>{
                 self.container()
                     .then(()=>self.resize())
-                    .finally(),true
+                    .finally(),false
             } 
         );
     }
-    autolayout_initialize(self = this){
+    async autolayout_initialize(self = this){
         $(".block-container").css({
             "display":"flex",
             "flex-direction":"column",
             "background-image":"radial-gradient(98% 4%, #FFFFFF 0%, #F0FFFD 100%);",
-            "font-weight": "bolder"
+            "font-weight": "bolder",
+            "max-width":layout_config['container-width']+"px"
         })  
         $(".row-block").css({
             "background-color": "red",
@@ -48,42 +49,61 @@ class Plugin{
             "flex-direction": "row",
             "font-weight": "bolder"
         })
-        layout_config['block'].forEach(block => {
+        await layout_config['block'].forEach(block => {
             //console.log(block)
             self.observer.stop_observe();
             $("#"+block.id).css({
                 "display": block.display,
                 "flex-direction": block["flex-direction"],
             })
-            block["items"].forEach(item => {
-                //console.log($(".row-block .1"))
-                $("#"+block.id).find("#"+item.id).css({
-                    "min-width":item.width+"px",
-                    "min-height":item.height+"px",
-                    "width":";",
-                })
+            if(block['item-repeat']!=null)
+                for (let i = 0; i < block['item-repeat']; i++) {
+                    //console.log("#"+block.items.id+"-"+(i+1))
+                    //console.log($("#"+block.id).find("#"+block.items.id+"-"+(i+1)))
+                    $("#"+block.id).find("#"+block.items.id+"-"+(i+1)).css({
+                        "min-width":block.items.width+"px",
+                        "min-height":block.items.height+"px",
+                        "width":";",
+                    })
+                }
+            else
+                block["items"].forEach(item => {
+                    //console.log($(".row-block .1"))
+                    $("#"+block.id).find("#"+item.id).css({
+                        "min-width":item.width+"px",
+                        "min-height":item.height+"px",
+                        "width":";",
+                    })
 
-            })
+                })
             if(block["flex-group"]>=1){
                 
                 var group = []
-                var number_of_row =  Math.round((block["items"].length/block["flex-group"])+0.25);
-                var length = block["items"].length;
+                
+                var number_of_row =  block["item-repeat"]!=null?Math.round((block['item-repeat']/block["flex-group"])+0.25):Math.round((block["items"].length/block["flex-group"])+0.25);
+                //var number_of_row =  Math.round((block["items"].length/block["flex-group"])+0.25);
+                var length = block["item-repeat"]!=null?block["item-repeat"]:block["items"].length;
+                //var length = block["items"].length;
                 var pointer = 0;
                 for (let i = 0; i <= number_of_row; i++) {
                     var element = self.document.createElement("div")
                     element.id = "group-"+block.id+"-"+(number_of_row-i);
-                    element.className = "group-sort-"+block.id;
+                    element.className = "group-sort "+block.id;
                     if(block["justify-content"]=="center")
                         element.style.cssText = "display:flex;flex-direction:row; justify-content: center;";
                     else
                         element.style.cssText = "display:flex;flex-direction:row;"; 
-                    for (let j = 0; j < block["flex-group"]; j++) {
-                        if(pointer<length&&$("#"+block.id).find("#"+block.items[pointer].id)[0]!=null){
-                            element.appendChild($("#"+block.id).find("#"+block.items[pointer].id)[0])
-                            pointer += 1
+                    if($("#"+block.id)[0]!=null)
+                        for (let j = 0; j < block["flex-group"]; j++) {
+                            if(block['item-repeat']!=null&&pointer<length&&$("#"+block.id).find("#"+block.items.id+'-'+(pointer+1))[0]!=null){
+                                element.appendChild($("#"+block.id).find("#"+block.items.id+'-'+(pointer+1))[0])
+                                pointer += 1
+                            }
+                            else if(pointer<length&&$("#"+block.id).find("#"+block.items[pointer].id)[0]!=undefined){
+                                element.appendChild($("#"+block.id).find("#"+block.items[pointer].id)[0])
+                                pointer += 1
+                            }
                         }
-                    }
                     group.push(element)
                     
                 }
@@ -132,31 +152,32 @@ class Plugin{
     }
     
     async container(self = this){
-        if(self.width==0)
-            await function(){
-                while(self.width==0){
-                    self.width = $('#container').width();
-                    self.height = $('#container').height();
-                }
-                console.log(self.width)
-            } 
-        self.width = $('#container').width();
-        self.height = $('#container').height();
         
+        self.width = $('html').width();
+        self.height = $('html').height();
     }
     async resize(self = this){
 
-            
-        if(self.width>=1000&&self.width<=1200){
+        
+        if(self.width>=1000){
             layout_config['block'].forEach(block=>{
                 if(block['flex-group']!=null&&block['flex-group']!=3)
                     block['flex-group'] = 3;
+                
             })
-            self.autolayout_initialize();
+            $("#main").css({
+                "display":"flex",
+                "justify-content": "center"
+            })
+            self.autolayout_initialize()
         }else if(self.width<=1000){
+            
             layout_config['block'].forEach(block=>{
                 if(block['flex-group']!=null&&block['flex-group']!=1)
                     block['flex-group'] = 1;
+            })
+            $("#main").css({
+                "display":" ",
             })
             self.autolayout_initialize();
         }
@@ -191,7 +212,8 @@ class Plugin{
             }
             if(changed){
                 if($("#container")[0]!={})
-                    self.autolayout_initialize()
+                    self.container()
+                        .then(self.resize())
                 changed = false;
             }
         };

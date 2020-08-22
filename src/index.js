@@ -12,6 +12,8 @@ Vue.use(VueRouter)
 Vue.use(core)
 Vue.config.productionTip = false
 
+
+
 //Vue.component('LoginComponent', {})
 
 
