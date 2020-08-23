@@ -14,18 +14,14 @@ class _init {
 }
 class Plugin{
     constructor(){
-        this.name = "animation.js";
+        this.name = "animation";
         this.bus_handler = null;
     }
-    async watch(self = this){
-        await function(){
-            
-
-        }()
+    watch(self = this){
     }
     async execute(self = this){
         var count = 0;
-        self.bus_handler.put(self.name,'state','executing')
+        //self.bus_handler.put(self.name,'executing')
         
         await function(){
 
@@ -40,7 +36,7 @@ class Plugin{
     }
     set_bus(bus=null){
         this.bus_handler = bus;
-        this.bus_handler.attach_plugin(this);
+        this.bus_handler.attach_plugin(this, this.name, {});
     }
 }
 export default _init;

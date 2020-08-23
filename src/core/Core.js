@@ -6,17 +6,17 @@ class core{
     constructor(){
 
         this.plugins = [];
-        console.log('core initilized')
+        console.log('core initialized')
         
     }
     getBoostrap() {
         return bootstrap;
     }
-    access_flow(plugin,action){
-        return bus.access_flow(plugin,action)
+    access_flow(plugin){
+        return bus.access_flow(plugin)
     }
-    put(plugin_name,action,data){
-        return bus.put(plugin_name,action,data)
+    put(plugin_name,data, callback){
+        bus.put(plugin_name,data,callback)
     }
     async _init_plugins(){
         if(bootstrap.plugins!=null&&this.plugins.length==0){  

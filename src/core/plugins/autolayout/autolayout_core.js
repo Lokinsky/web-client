@@ -22,8 +22,10 @@ class Plugin{
         this.window = global.window
         this.document = global.window.document
         this.observer = new Observer(this.observe());
+        this.layout = layout_config
         this.initialize_events();
         this.container()
+        
 
     }
     initialize_events(self = this){
@@ -41,7 +43,7 @@ class Plugin{
             "flex-direction":"column",
             "background-image":"radial-gradient(98% 4%, #FFFFFF 0%, #F0FFFD 100%);",
             "font-weight": "bolder",
-            "max-width":layout_config['container-width']+"px"
+            "max-width":self.layout['container-width']+"px"
         })  
         $(".row-block").css({
             "background-color": "red",
@@ -49,7 +51,7 @@ class Plugin{
             "flex-direction": "row",
             "font-weight": "bolder"
         })
-        await layout_config['block'].forEach(block => {
+        await self.layout['block'].forEach(block => {
             //console.log(block)
             self.observer.stop_observe();
             $("#"+block.id).css({
@@ -58,8 +60,7 @@ class Plugin{
             })
             if(block['item-repeat']!=null)
                 for (let i = 0; i < block['item-repeat']; i++) {
-                    //console.log("#"+block.items.id+"-"+(i+1))
-                    //console.log($("#"+block.id).find("#"+block.items.id+"-"+(i+1)))
+
                     $("#"+block.id).find("#"+block.items.id+"-"+(i+1)).css({
                         "min-width":block.items.width+"px",
                         "min-height":block.items.height+"px",
@@ -68,7 +69,7 @@ class Plugin{
                 }
             else
                 block["items"].forEach(item => {
-                    //console.log($(".row-block .1"))
+
                     $("#"+block.id).find("#"+item.id).css({
                         "min-width":item.width+"px",
                         "min-height":item.height+"px",
@@ -81,9 +82,7 @@ class Plugin{
                 var group = []
                 
                 var number_of_row =  block["item-repeat"]!=null?Math.round((block['item-repeat']/block["flex-group"])+0.25):Math.round((block["items"].length/block["flex-group"])+0.25);
-                //var number_of_row =  Math.round((block["items"].length/block["flex-group"])+0.25);
                 var length = block["item-repeat"]!=null?block["item-repeat"]:block["items"].length;
-                //var length = block["items"].length;
                 var pointer = 0;
                 for (let i = 0; i <= number_of_row; i++) {
                     var element = self.document.createElement("div")
@@ -96,20 +95,30 @@ class Plugin{
                     if($("#"+block.id)[0]!=null)
                         for (let j = 0; j < block["flex-group"]; j++) {
                             if(block['item-repeat']!=null&&pointer<length&&$("#"+block.id).find("#"+block.items.id+'-'+(pointer+1))[0]!=null){
-                                element.appendChild($("#"+block.id).find("#"+block.items.id+'-'+(pointer+1))[0])
+                                if(block["order"]=="desc")
+                                    element.prepend($("#"+block.id).find("#"+block.items.id+'-'+(pointer+1))[0])
+                                else
+                                    element.appendChild($("#"+block.id).find("#"+block.items.id+'-'+(pointer+1))[0])
+                                    
                                 pointer += 1
                             }
                             else if(pointer<length&&$("#"+block.id).find("#"+block.items[pointer].id)[0]!=undefined){
-                                element.appendChild($("#"+block.id).find("#"+block.items[pointer].id)[0])
+                                if(block["order"]=="desc")
+                                    element.prepend($("#"+block.id).find("#"+block.items[pointer].id)[0])
+                                else
+                                    element.appendChild($("#"+block.id).find("#"+block.items[pointer].id)[0])
+                                
                                 pointer += 1
                             }
+                            
+
                         }
                     group.push(element)
                     
                 }
                 if(block["order"]=="desc")
                     group.reverse()
-                //console.log(group)
+                
                 group.forEach(div=>{
                     if($("#"+div.id)[0]==null)
                         $("#"+block.id).append(div)
@@ -124,13 +133,13 @@ class Plugin{
         });  
     }
     sort(elementId,asSort,self = this){
-        for (let i = 0; i < layout_config["block"].length; i++) {
-            const block = layout_config["block"][i]
+        for (let i = 0; i < self.layout["block"].length; i++) {
+            const block = self.layout["block"][i]
             if(block.id == elementId){
-                //console.log(layout_config["block"][i])
+
                 if(block['flex-group']==asSort)
                     return;
-                layout_config["block"][i]["flex-group"] = asSort
+                    self.layout["block"][i]["flex-group"] = asSort
                 break;
             }
 
@@ -138,9 +147,7 @@ class Plugin{
         self.autolayout_initialize();
     }
     async execute(self = this){
-        self.bus_handler.put(this.name,'state','executing');
-        
-        
+
         await function(){
             
         }()
@@ -153,48 +160,38 @@ class Plugin{
     
     async container(self = this){
         
-        self.width = $('html').width();
-        self.height = $('html').height();
+        self.width = await $('html').width();
+        self.height = await $('html').height();
     }
     async resize(self = this){
 
-        
+        var main = {}
+        var flex_group = 0;
         if(self.width>=1000){
-            layout_config['block'].forEach(block=>{
-                if(block['flex-group']!=null&&block['flex-group']!=3)
-                    block['flex-group'] = 3;
-                
-            })
-            $("#main").css({
+            flex_group = 3;
+            main = {
                 "display":"flex",
                 "justify-content": "center"
-            })
-            self.autolayout_initialize()
+            }
         }else if(self.width<=1000){
-            
-            layout_config['block'].forEach(block=>{
-                if(block['flex-group']!=null&&block['flex-group']!=1)
-                    block['flex-group'] = 1;
-            })
-            $("#main").css({
+            flex_group = 1;
+            main = {
                 "display":" ",
-            })
-            self.autolayout_initialize();
+            }
         }
+        
+        self.layout['block'].forEach(block=>{
+            if(block['flex-group']!=null&&block['flex-group']!=flex_group)
+                block['flex-group'] = flex_group;  
+        })
+        $("#main").css(main);
+        self.autolayout_initialize();
     }
-    async watch(self = this){
-        await function(){
-            var flow = self.bus_handler.access_flow(self.name,"*")
-            flow.forEach(f=>{
-                //console.log(f)
-                switch(f.action){
-                    case 'sort':
-                        //console.log(f)
-                        self.sort(f.data.blockid,f.data.type)
-                        break;
-                }
-            })
-        }()
+    watch(self = this){
+        var flow = self.bus_handler.access_flow(self.name)
+        //console.log(flow)
+        self.layout = flow.data
+        self.autolayout_initialize()
     }
     observe(self = this){
         var changed = false;
@@ -224,7 +221,7 @@ class Plugin{
 
     set_bus(bus=null){
         this.bus_handler = bus;
-        this.bus_handler.attach_plugin(this);
+        this.bus_handler.attach_plugin(this, this.name, this.layout);
     }
 }
 
