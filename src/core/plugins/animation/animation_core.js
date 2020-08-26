@@ -1,4 +1,6 @@
 import paper from "paper";
+
+//require('paper')
 class _init {
     constructor(){
         this.plugin = new Plugin();
@@ -23,6 +25,7 @@ class Plugin{
         var count = 0;
         //self.bus_handler.put(self.name,'executing')
         
+        //rotationCube()
         await function(){
 
             /*setInterval(()=>{
@@ -40,3 +43,26 @@ class Plugin{
     }
 }
 export default _init;
+
+var rotationCube = function (){
+    var project = new paper.Project(window.document.getElementById('cube'))
+    var view = project.view
+
+    //console.log(project)
+    var path = new paper.Path.Circle(new paper.Point(80, 50), 75);
+    path.fillColor = 'red'
+    path.selected = true
+	// Give the stroke a color
+    path.strokeColor = 'black';
+
+    var x = view.viewSize.width/2
+    var y = view.viewSize.height/2
+
+    var start = new paper.Point(x,y);
+    console.log(start)
+
+    project.activeLayer.activate()
+
+    
+    
+}

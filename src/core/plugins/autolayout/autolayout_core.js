@@ -49,10 +49,10 @@ class Plugin{
             "background-color": "red",
             "display": "flex",
             "flex-direction": "row",
-            "font-weight": "bolder"
+            "font-weight": "bolder",
         })
         await self.layout['block'].forEach(block => {
-            //console.log(block)
+
             self.observer.stop_observe();
             $("#"+block.id).css({
                 "display": block.display,
@@ -62,18 +62,22 @@ class Plugin{
                 for (let i = 0; i < block['item-repeat']; i++) {
 
                     $("#"+block.id).find("#"+block.items.id+"-"+(i+1)).css({
-                        "min-width":block.items.width+"px",
-                        "min-height":block.items.height+"px",
-                        "width":";",
+                        "max-width":block.items.width!=null?block.items.width+"px":';',
+                        "min-width":block.items['min-width']!=null?block.items['min-width']+"px":';',
+                        "max-height":block.items.height!=null?block.items.height+"px":';',
+                        "width":block.items['width-size']!=null?block.items['width-size']:";",
+                        "padding":"0px 15px"
                     })
                 }
             else
                 block["items"].forEach(item => {
 
                     $("#"+block.id).find("#"+item.id).css({
-                        "min-width":item.width+"px",
-                        "min-height":item.height+"px",
-                        "width":";",
+                        "max-width":item.width!=null?item.width+"px":';',
+                        "min-width":item['min-width']!=null?item['min-width']+"px":';',
+                        "max-height":item.height!=null?item.height+"px":';',
+                        "width":item['width-size']!=null?item['width-size']:';',
+                        "padding":"0px 15px"
                     })
 
                 })
@@ -94,20 +98,21 @@ class Plugin{
                         element.style.cssText = "display:flex;flex-direction:row;"; 
                     if($("#"+block.id)[0]!=null)
                         for (let j = 0; j < block["flex-group"]; j++) {
-                            if(block['item-repeat']!=null&&pointer<length&&$("#"+block.id).find("#"+block.items.id+'-'+(pointer+1))[0]!=null){
-                                if(block["order"]=="desc")
-                                    element.prepend($("#"+block.id).find("#"+block.items.id+'-'+(pointer+1))[0])
-                                else
-                                    element.appendChild($("#"+block.id).find("#"+block.items.id+'-'+(pointer+1))[0])
-                                    
+                            if(block['item-repeat']!=null&&pointer<length&&$("#"+block.id).find("#"+block.items.id+'-'+(pointer+1))!=undefined){
+                                if($("#"+block.id).find("#"+block.items.id+'-'+(pointer+1))[0]!=undefined)
+                                    if(block["order"]=="desc")
+                                        element.prepend($("#"+block.id).find("#"+block.items.id+'-'+(pointer+1))[0])
+                                    else
+                                        element.appendChild($("#"+block.id).find("#"+block.items.id+'-'+(pointer+1))[0])
                                 pointer += 1
                             }
-                            else if(pointer<length&&$("#"+block.id).find("#"+block.items[pointer].id)[0]!=undefined){
-                                if(block["order"]=="desc")
-                                    element.prepend($("#"+block.id).find("#"+block.items[pointer].id)[0])
-                                else
-                                    element.appendChild($("#"+block.id).find("#"+block.items[pointer].id)[0])
-                                
+                            else if(pointer<length&&$("#"+block.id).find("#"+block.items[pointer].id)!=undefined){
+                                if($("#"+block.id).find("#"+block.items[pointer].id)[0]!=undefined)
+                                    if(block["order"]=="desc")
+                                        element.prepend($("#"+block.id).find("#"+block.items[pointer].id)[0])
+                                    else
+                                        element.appendChild($("#"+block.id).find("#"+block.items[pointer].id)[0])
+
                                 pointer += 1
                             }
                             
@@ -126,7 +131,7 @@ class Plugin{
                         $("#"+block.id).find("#"+div.id).replaceWith(div)
                         $("#"+block.id).append($("#"+block.id).find("#"+div.id))
                     }
-                    //console.log(div)
+
                 })
             }
             self.observer.start_observe();
